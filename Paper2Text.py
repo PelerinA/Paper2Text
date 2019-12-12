@@ -88,8 +88,13 @@ def main():
             paper.title=parser.getTitle()
             paper.abstract=parser.getAbstract()
             # ecriture de l'entite Paper au format texte dans le dossier output
-            # PersiFichierTexte.stringToPersi(paper.toText(),outputDir+os.path.sep+filename)
-            PersiFichierTexte.stringToPersi(paper.toXML(),outputDir+os.path.sep+filename[:-3]+"xml")
+            if len(sys.argv) <= 2 or sys.argv[2] == "-t" :
+                PersiFichierTexte.stringToPersi(paper.toText(),outputDir+os.path.sep+filename)
+            elif sys.argv[2] == "-x" :
+                PersiFichierTexte.stringToPersi(paper.toXML(),outputDir+os.path.sep+filename[:-3]+"xml")
+            else : 
+                print("Unvalid option " + sys.argv[2])
+                break
 
 main()
 # paper = PaperEnt()
