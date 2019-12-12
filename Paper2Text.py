@@ -60,7 +60,10 @@ class Parser:
     
     # derniere page ou après Aknowledgments et References
     def getBiblio(self):
-        pass
+        ss = re.search('(?is)references(.*?)\Z',self.content)
+        if ss:
+            return ss.group(1).replace('\n',' ')
+        return ""
 
 def main():
     # on suppose que le targetDir est dans le meme repertoire que le script
@@ -87,6 +90,7 @@ def main():
             paper.filename=filename[:-4]+".pdf"
             paper.title=parser.getTitle()
             paper.abstract=parser.getAbstract()
+            paper.biblio=parser.getBiblio()
             # ecriture de l'entite Paper au format texte dans le dossier output
             # PersiFichierTexte.stringToPersi(paper.toText(),outputDir+os.path.sep+filename)
             PersiFichierTexte.stringToPersi(paper.toXML(),outputDir+os.path.sep+filename[:-3]+"xml")
