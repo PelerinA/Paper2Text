@@ -18,7 +18,7 @@ class PaperEnt:
     def toXML(self):
         return """<article>\n
             <preamble>"""+self.filename+"""</preamble>\n
-            <title>"""+self.title+"""</titre>\n
+            <title>"""+self.title+"""</title>\n
             <auteur>"""+self.auteurs+"""</auteur>\n
             <abstract>"""+self.abstract+"""</abstract>\n
             <biblio>"""+self.biblio+"""</biblio>\n
@@ -38,7 +38,7 @@ class PersiFichierTexte:
 class Parser:
     def __init__(self,content):
         self.content=content
-    
+
     # premiere ligne
     def getTitle(self):
         return self.content.partition('\n')[0]
@@ -49,47 +49,52 @@ class Parser:
         if ss:
             return ss.group(1).replace('\n',' ')
         return ""
-    
+
     # entre le titre et l'abstract
     def getAuteurs(self):
         # ss = re.search('(?is)'+self.getTitle()+'(.*?)abstract',self.content)
-        # if ss:
+        # if ss:./tmp/Mikolov_2013_Distributed
         #     return ss.group(1)
         # return ""
         pass
-    
+
     # derniere page ou après Aknowledgments et References
     def getBiblio(self):
         pass
 
-def main():
-    # on suppose que le targetDir est dans le meme repertoire que le script
-    targetDir=os.path.dirname(os.path.realpath(__file__))+os.path.sep+sys.argv[1]
-    outputDir=targetDir+os.path.sep+"output"
+class Converter:
+    def __init__(self):
+        # on suppose que le targetDir est dans le meme repertoire que le script
+        self.targetDir=os.path.dirname(os.path.realpath(__file__))+os.path.sep+sys.argv[1]
+        self.outputDir=self.targetDir+os.path.sep+"output"
+        self.tmpDir="./tmp"
 
-    # creer un sous dossier à ce dossier (le supprimer s'il existe deja)
-    if os.path.exists(outputDir) and os.path.isdir(outputDir):
-        shutil.rmtree(outputDir)
-    os.mkdir(outputDir)
+    def createTemporaryFiles(self):
+        # convertir les PDF en format txt avec pdftotext dans un dossier tmp
+            for filename in os.listdir(self.targetDir):
+                if filename.endswith('.pdf'):
+                    f = filename.replace(" ","\ ")
+                    os.system("pdftotext "+self.targetDir+os.path.sep+f+" "+self.tmpDir+os.path.sep+f[:-3]+"txt")
 
-    # convertir les PDF en format txt avec pdftotext dans un dossier tmp
-    with tempfile.TemporaryDirectory() as tmpDir:
-        for filename in os.listdir(targetDir):
-            if filename.endswith('.pdf'):
-                f = filename.replace(" ","\ ")
-                os.system("pdftotext "+targetDir+os.path.sep+f+" "+tmpDir+os.path.sep+f[:-3]+"txt")
-
+    def convert(self):
         # # deposer les sorties au format .txt, avec meme nom que pdf respectif
-        for filename in os.listdir(tmpDir):
+        for filename in os.listdir(self.tmpDir):
             # parsing vers entite Paper
             paper = PaperEnt()
-            parser = Parser(PersiFichierTexte.persiToString(tmpDir+os.path.sep+filename))
+            parser = Parser(PersiFichierTexte.persiToString(self.tmpDir+os.path.sep+filename))
             paper.filename=filename[:-4]+".pdf"
             paper.title=parser.getTitle()
             paper.abstract=parser.getAbstract()
             # ecriture de l'entite Paper au format texte dans le dossier output
             # PersiFichierTexte.stringToPersi(paper.toText(),outputDir+os.path.sep+filename)
-            PersiFichierTexte.stringToPersi(paper.toXML(),outputDir+os.path.sep+filename[:-3]+"xml")
+            PersiFichierTexte.stringToPersi(paper.toXML(),self.outputDir+os.path.sep+filename[:-3]+"xml")
+
+
+
+def main():
+    converter = Converter()
+    converter.createTemporaryFiles()
+    converter.convert()
 
 main()
 # paper = PaperEnt()
