@@ -5,15 +5,16 @@ import shutil
 import tempfile
 
 class PaperEnt:
-    def __init__(self,filename="",title="",abstract="",auteurs="",biblio=""):
+    def __init__(self,filename="",title="",abstract="",intro="",auteurs="",biblio=""):
         self.filename=filename
         self.title=title
         self.abstract=abstract
+        self.intro=intro
         self.auteurs=auteurs
         self.biblio=biblio
 
     def toText(self):
-        return self.filename+'\n'+self.title+'\n'+self.auteurs+self.abstract+'\n'+self.biblio
+        return self.filename+'\n'+self.title+'\n'+self.auteurs+self.abstract+'\n'+self.intro+'\n'+self.biblio
 
     def toXML(self):
         return """<article>\n
@@ -21,6 +22,7 @@ class PaperEnt:
             <title>"""+self.title+"""</title>\n
             <auteur>"""+self.auteurs+"""</auteur>\n
             <abstract>"""+self.abstract+"""</abstract>\n
+            <introduction>"""+self.intro+"""</introduction>\n
             <biblio>"""+self.biblio+"""</biblio>\n
             </article>"""
 
@@ -53,7 +55,7 @@ class Parser:
                 for word in re.findall(r"[\w']+", line):
                     if word == (firstname.upper()[0] + firstname.lower()[1:-1]):
                         return self.content.find(line)
-        
+
 
     # premiere ligne ou contenu avant la premiere ligne contenant un prenom
     def getTitle(self):
@@ -81,20 +83,34 @@ class Parser:
             return ss.group(1).replace('\n',' ')
         return ""
 
-        # contenu entre l'intro et la conclusion
+    # contenu entre l'intro et la conclusion
     def getCorps(self):
         ss = re.search('(?is)\nintroduction.*?\n2(.*?)\nconclusion.*?\Z',self.content)
         if ss:
             return "2"+ss.group(1).replace('\n',' ')[:-2]
         return ""
 
+    def getIntroduction(self):
+        ss = re.search('(?is)introduction(.*?)2\n\n',self.content)
+        if ss:
+            return ss.group(1).replace('\n',' ')
+        return ""
+
 class Manager:
+
     def __init__(self):
         # on suppose que le targetDir est dans le meme repertoire que le script
         self.targetDir=os.path.dirname(os.path.realpath(__file__))+os.path.sep+sys.argv[1]
         self.outputDir=self.targetDir+os.path.sep+"output"
         self.tmpDir="./tmp"
+
+        #On verifie que les dossiers ne sont pas présents au démarrage du script
+        self.removeOutputFolder()
         self.removeTemporaryFolder()
+
+        #On les crée
+        os.mkdir(self.outputDir, 0o755)
+        print("Répertoire output crée")
         os.mkdir(self.tmpDir, 0o755)
         self.analyseTargetFolder()
         index = 0
@@ -121,6 +137,7 @@ class Manager:
             paper.title=parser.getTitle()
             paper.auteurs=parser.getAuteurs()
             paper.abstract=parser.getAbstract()
+            paper.intro=parser.getIntroduction()
             paper.biblio=parser.getBiblio()
             paper.corps=parser.getCorps()
             # ecriture de l'entite Paper au format texte dans le dossier output
@@ -184,6 +201,13 @@ class Manager:
         print("")
         print(PersiFichierTexte.persiToString("art"))
         print("")
+
+    def removeOutputFolder(self):
+        if os.path.exists(self.outputDir):
+                shutil.rmtree(self.outputDir)
+                print("Répertoire output supprimé")
+        else:
+            print("Le repertoire output ne peut être supprimé, il n'existe pas")
 
 
 def main():
