@@ -5,15 +5,16 @@ import shutil
 import tempfile
 
 class PaperEnt:
-    def __init__(self,filename="",title="",abstract="",auteurs="",biblio=""):
+    def __init__(self,filename="",title="",abstract="",intro="",auteurs="",biblio=""):
         self.filename=filename
         self.title=title
         self.abstract=abstract
+        self.intro=intro
         self.auteurs=auteurs
         self.biblio=biblio
 
     def toText(self):
-        return self.filename+'\n'+self.title+'\n'+self.auteurs+self.abstract+'\n'+self.biblio
+        return self.filename+'\n'+self.title+'\n'+self.auteurs+self.abstract+'\n'+self.intro+'\n'+self.biblio
 
     def toXML(self):
         return """<article>\n
@@ -21,6 +22,7 @@ class PaperEnt:
             <title>"""+self.title+"""</title>\n
             <auteur>"""+self.auteurs+"""</auteur>\n
             <abstract>"""+self.abstract+"""</abstract>\n
+            <introduction>"""+self.intro+"""</introduction>\n
             <biblio>"""+self.biblio+"""</biblio>\n
             </article>"""
 
@@ -53,7 +55,7 @@ class Parser:
                 for word in re.findall(r"[\w']+", line):
                     if word == (firstname.upper()[0] + firstname.lower()[1:-1]):
                         return self.content.find(line)
-        
+
 
     # premiere ligne ou contenu avant la premiere ligne contenant un prenom
     def getTitle(self):
@@ -69,7 +71,7 @@ class Parser:
     # entre le titre et l'abstract
     def getAuteurs(self):
         title = self.getTitle()
-        print("Title: " + title)
+        #print("Title: " + title)
         ss = re.search('(?is)'+title+'(.*?)abstract',self.content)
         if ss:
             return ss.group(1).replace('\n',' ')
@@ -82,7 +84,7 @@ class Parser:
         return ""
 
     def getIntroduction(self):
-        ss = re.search('(?is)introduction(.*?)2. ',self.content)
+        ss = re.search('(?is)introduction(.*?)2\n\n',self.content)
         if ss:
             return ss.group(1).replace('\n',' ')
         return ""
@@ -135,11 +137,9 @@ class Converter:
 
 
 def main():
-    #converter = Converter()
-    #converter.createTemporaryFiles()
-    #converter.convert()
-    #converter.removeTemporaryFolder()
-    myparser = Parser(PersiFichierTexte.persiToString("lin.txt"))
-    print(myparser.getIntroduction())
+    converter = Converter()
+    converter.createTemporaryFiles()
+    converter.convert()
+    converter.removeTemporaryFolder()
 
 main()
