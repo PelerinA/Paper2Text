@@ -5,11 +5,13 @@ import shutil
 import tempfile
 
 class PaperEnt:
-    def __init__(self,filename="",title="",abstract="",auteurs="",biblio=""):
+    def __init__(self,filename="",title="",abstract="",auteurs="",conclusion="",acknow="",biblio=""):
         self.filename=filename
         self.title=title
         self.abstract=abstract
         self.auteurs=auteurs
+        self.conclusion=conclusion
+        self.acknow=acknow
         self.biblio=biblio
 
     def toText(self):
@@ -18,9 +20,11 @@ class PaperEnt:
     def toXML(self):
         return """<article>\n
             <preamble>"""+self.filename+"""</preamble>\n
-            <title>"""+self.title+"""</title>\n
+            <title>"""+self.title+"""</titre>\n
             <auteur>"""+self.auteurs+"""</auteur>\n
             <abstract>"""+self.abstract+"""</abstract>\n
+            <conclusion>"""+self.conclusion+"""</conclusion>\n
+            <acknowledgments>"""+self.acknow+"""</acknowledgments>\n
             <biblio>"""+self.biblio+"""</biblio>\n
             </article>"""
 
@@ -53,7 +57,7 @@ class Parser:
             for firstname in self.firstnames:
                 if(line.find(firstname[:-1] + " ") != -1):
                     return self.content.find(line)
-        
+
 
     # premiere ligne ou contenu avant la premiere ligne contenant un prenom
     def getTitle(self):
@@ -73,11 +77,35 @@ class Parser:
         if ss:
             return ss.group(1).replace('\n',' ')
         return ""
+
     # derniere page ou après Aknowledgments et References
     def getBiblio(self):
         ss = re.search('(?is)\nreferences\n(.*?)\Z',self.content)
         if ss:
             return ss.group(1).replace('\n',' ')
+        else:
+            ss = re.search('(?is)references(.*?)\Z',self.content)
+            if ss:
+                return ss.group(1).replace('\n',' ')
+        return ""
+
+    # avant la biblio
+    def getConclusion(self):
+        ss = re.search('(?is)conclusion(.*?)\Z',self.content)
+        if ss:
+            conclusion = ss.group(1)
+            conclusion =  '\n'.join(conclusion.split('\n')[1:]).replace('\n',' ')
+            tmp = self.getBiblio()
+            tmp2 = self.getAcknow()
+            return conclusion.replace(tmp,'').replace(tmp2,'')
+        return ""
+
+    def getAcknow(self):
+        ss = re.search('(?is)acknowledgments(.*?)\Z',self.content)
+        if ss:
+            acknow = ss.group(1).replace('\n',' ')
+            tmp = self.getBiblio()
+            return acknow.replace(tmp,'')
         return ""
 
 class Converter:
@@ -114,7 +142,7 @@ class Converter:
                 PersiFichierTexte.stringToPersi(paper.toText(),self.outputDir+os.path.sep+filename)
             elif sys.argv[2] == "-x" :
                 PersiFichierTexte.stringToPersi(paper.toXML(),self.outputDir+os.path.sep+filename[:-3]+"xml")
-            else : 
+            else :
                 print("Unvalid option " + sys.argv[2])
                 break
 
