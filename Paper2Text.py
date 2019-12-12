@@ -80,6 +80,12 @@ class Parser:
             return ss.group(1).replace('\n',' ')
         return ""
 
+    def getIntroduction(self):
+        ss = re.search('(?is)introduction(.*?)2. ',self.content)
+        if ss:
+            return ss.group(1).replace('\n',' ')
+        return ""
+
 class Converter:
     def __init__(self):
         # on suppose que le targetDir est dans le meme repertoire que le script
@@ -107,6 +113,7 @@ class Converter:
             paper.title=parser.getTitle()
             paper.auteurs=parser.getAuteurs()
             paper.abstract=parser.getAbstract()
+            paper.intro=parser.getIntroduction()
             paper.biblio=parser.getBiblio()
             # ecriture de l'entite Paper au format texte dans le dossier output
             if len(sys.argv) <= 2 or sys.argv[2] == "-t" :
@@ -127,9 +134,11 @@ class Converter:
 
 
 def main():
-    converter = Converter()
-    converter.createTemporaryFiles()
-    converter.convert()
-    converter.removeTemporaryFolder()
+    #converter = Converter()
+    #converter.createTemporaryFiles()
+    #converter.convert()
+    #converter.removeTemporaryFolder()
+    myparser = Parser(PersiFichierTexte.persiToString("lin.txt"))
+    print(myparser.getIntroduction())
 
 main()
