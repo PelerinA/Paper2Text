@@ -13,7 +13,7 @@ class PaperEnt:
         self.biblio=biblio
 
     def toText(self):
-        return self.filename+'\n'+self.title+'\n'+self.auteur+self.abstract+'\n'+self.biblio
+        return self.filename+'\n'+self.title+'\n'+self.auteurs+self.abstract+'\n'+self.biblio
 
     def toXML(self):
         return """<article>\n
@@ -65,7 +65,7 @@ class Parser:
         if ss:
             return ss.group(1).replace('\n',' ')
         return ""
-    
+
     # entre le titre et l'abstract
     def getAuteurs(self):
         print(self.getTitle())
@@ -73,7 +73,6 @@ class Parser:
         if ss:
             return ss.group(1).replace('\n',' ')
         return ""
-    
     # derniere page ou après Aknowledgments et References
     def getBiblio(self):
         ss = re.search('(?is)references(.*?)\Z',self.content)
@@ -81,28 +80,30 @@ class Parser:
             return ss.group(1).replace('\n',' ')
         return ""
 
-def main():
-    # on suppose que le targetDir est dans le meme repertoire que le script
-    targetDir=os.path.dirname(os.path.realpath(__file__))+os.path.sep+sys.argv[1]
-    outputDir=targetDir+os.path.sep+"output"
+class Converter:
+    def __init__(self):
+        # on suppose que le targetDir est dans le meme repertoire que le script
+        self.targetDir=os.path.dirname(os.path.realpath(__file__))+os.path.sep+sys.argv[1]
+        self.outputDir=self.targetDir+os.path.sep+"output"
+        self.tmpDir="./tmp"
+        if os.path.exists(self.tmpDir):
+            print("Le répertoire /tmp existe déjà")
+        else:
+            os.mkdir(self.tmpDir, 0o755)
 
-    # creer un sous dossier à ce dossier (le supprimer s'il existe deja)
-    if os.path.exists(outputDir) and os.path.isdir(outputDir):
-        shutil.rmtree(outputDir)
-    os.mkdir(outputDir)
+    def createTemporaryFiles(self):
+        # convertir les PDF en format txt avec pdftotext dans un dossier tmp
+            for filename in os.listdir(self.targetDir):
+                if filename.endswith('.pdf'):
+                    f = filename.replace(" ","\ ")
+                    os.system("pdftotext "+self.targetDir+os.path.sep+f+" "+self.tmpDir+os.path.sep+f[:-3]+"txt")
 
-    # convertir les PDF en format txt avec pdftotext dans un dossier tmp
-    with tempfile.TemporaryDirectory() as tmpDir:
-        for filename in os.listdir(targetDir):
-            if filename.endswith('.pdf'):
-                f = filename.replace(" ","\ ")
-                os.system("pdftotext "+targetDir+os.path.sep+f+" "+tmpDir+os.path.sep+f[:-3]+"txt")
-
+    def convert(self):
         # # deposer les sorties au format .txt, avec meme nom que pdf respectif
-        for filename in os.listdir(tmpDir):
+        for filename in os.listdir(self.tmpDir):
             # parsing vers entite Paper
             paper = PaperEnt()
-            parser = Parser(PersiFichierTexte.persiToString(tmpDir+os.path.sep+filename))
+            parser = Parser(PersiFichierTexte.persiToString(self.tmpDir+os.path.sep+filename))
             paper.filename=filename[:-4]+".pdf"
             paper.title=parser.getTitle()
             paper.auteurs=parser.getAuteurs()
@@ -110,11 +111,25 @@ def main():
             paper.biblio=parser.getBiblio()
             # ecriture de l'entite Paper au format texte dans le dossier output
             if len(sys.argv) <= 2 or sys.argv[2] == "-t" :
-                PersiFichierTexte.stringToPersi(paper.toText(),outputDir+os.path.sep+filename)
+                PersiFichierTexte.stringToPersi(paper.toText(),self.outputDir+os.path.sep+filename)
             elif sys.argv[2] == "-x" :
-                PersiFichierTexte.stringToPersi(paper.toXML(),outputDir+os.path.sep+filename[:-3]+"xml")
+                PersiFichierTexte.stringToPersi(paper.toXML(),self.outputDir+os.path.sep+filename[:-3]+"xml")
             else : 
                 print("Unvalid option " + sys.argv[2])
                 break
+
+    def removeTemporaryFolder(self):
+        if os.path.exists(self.tmpDir):
+                shutil.rmtree(self.tmpDir)
+        else:
+            print("Le repertoire tmp ne peut être supprimé")
+
+
+
+def main():
+    converter = Converter()
+    converter.createTemporaryFiles()
+    converter.convert()
+    converter.removeTemporaryFolder()
 
 main()
