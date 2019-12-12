@@ -109,18 +109,12 @@ def main():
             paper.abstract=parser.getAbstract()
             paper.biblio=parser.getBiblio()
             # ecriture de l'entite Paper au format texte dans le dossier output
-            # PersiFichierTexte.stringToPersi(paper.toText(),outputDir+os.path.sep+filename)
-            PersiFichierTexte.stringToPersi(paper.toXML(),outputDir+os.path.sep+filename[:-3]+"xml")
+            if len(sys.argv) <= 2 or sys.argv[2] == "-t" :
+                PersiFichierTexte.stringToPersi(paper.toText(),outputDir+os.path.sep+filename)
+            elif sys.argv[2] == "-x" :
+                PersiFichierTexte.stringToPersi(paper.toXML(),outputDir+os.path.sep+filename[:-3]+"xml")
+            else : 
+                print("Unvalid option " + sys.argv[2])
+                break
 
 main()
-<<<<<<< HEAD
-=======
-# paper = PaperEnt()
-# filename = "levner.txt"
-# filepath = os.path.dirname(os.path.realpath(__file__))+os.path.sep+filename
-# parser = Parser(PersiFichierTexte.persiToString(filepath))
-# paper.filename = filename
-# paper.title = parser.getTitle()
-# paper.abstract = parser.getAbstract()
-# print(paper.toText())
->>>>>>> sprint3-biblio
