@@ -76,7 +76,10 @@ class Parser:
     
     # derniere page ou après Aknowledgments et References
     def getBiblio(self):
-        pass
+        ss = re.search('(?is)references(.*?)\Z',self.content)
+        if ss:
+            return ss.group(1).replace('\n',' ')
+        return ""
 
 def main():
     # on suppose que le targetDir est dans le meme repertoire que le script
@@ -104,9 +107,20 @@ def main():
             paper.title=parser.getTitle()
             paper.auteurs=parser.getAuteurs()
             paper.abstract=parser.getAbstract()
-
+            paper.biblio=parser.getBiblio()
             # ecriture de l'entite Paper au format texte dans le dossier output
             # PersiFichierTexte.stringToPersi(paper.toText(),outputDir+os.path.sep+filename)
             PersiFichierTexte.stringToPersi(paper.toXML(),outputDir+os.path.sep+filename[:-3]+"xml")
 
 main()
+<<<<<<< HEAD
+=======
+# paper = PaperEnt()
+# filename = "levner.txt"
+# filepath = os.path.dirname(os.path.realpath(__file__))+os.path.sep+filename
+# parser = Parser(PersiFichierTexte.persiToString(filepath))
+# paper.filename = filename
+# paper.title = parser.getTitle()
+# paper.abstract = parser.getAbstract()
+# print(paper.toText())
+>>>>>>> sprint3-biblio
