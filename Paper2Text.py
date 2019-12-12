@@ -48,11 +48,11 @@ class Parser:
     def nbFirstLineWithName(self):
         # parcourir le contenu a parser
         fileLines = self.content.split("\n")
-        found = 0
         for line in fileLines:
             for firstname in self.firstnames:
-                if(line.find(firstname[:-1] + " ") != -1):
-                    return self.content.find(line)
+                for word in re.findall(r"[\w']+", line):
+                    if word == (firstname.upper()[0] + firstname.lower()[1:-1]):
+                        return self.content.find(line)
         
 
     # premiere ligne ou contenu avant la premiere ligne contenant un prenom
@@ -68,8 +68,9 @@ class Parser:
 
     # entre le titre et l'abstract
     def getAuteurs(self):
-        print(self.getTitle())
-        ss = re.search('(?is)'+self.getTitle()+'(.*?)abstract',self.content)
+        title = self.getTitle()
+        print("Title: " + title)
+        ss = re.search('(?is)'+title+'(.*?)abstract',self.content)
         if ss:
             return ss.group(1).replace('\n',' ')
         return ""
