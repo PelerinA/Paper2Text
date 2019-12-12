@@ -5,16 +5,17 @@ import shutil
 import tempfile
 
 class PaperEnt:
-    def __init__(self,filename="",title="",abstract="",intro="",auteurs="",biblio=""):
+    def __init__(self,filename="",title="",abstract="",intro="",auteurs="",biblio="", corps=""):
         self.filename=filename
         self.title=title
         self.abstract=abstract
         self.intro=intro
         self.auteurs=auteurs
         self.biblio=biblio
+        self.corps=corps
 
     def toText(self):
-        return self.filename+'\n'+self.title+'\n'+self.auteurs+self.abstract+'\n'+self.intro+'\n'+self.biblio
+        return self.filename+'\n'+self.title+'\n'+self.auteurs+self.abstract+'\n'+self.intro+'\n'+self.corps+'\n'+self.biblio
 
     def toXML(self):
         return """<article>\n
@@ -23,6 +24,7 @@ class PaperEnt:
             <auteur>"""+self.auteurs+"""</auteur>\n
             <abstract>"""+self.abstract+"""</abstract>\n
             <introduction>"""+self.intro+"""</introduction>\n
+            <corps>"""+self.intro+"""</corps>\n
             <biblio>"""+self.biblio+"""</biblio>\n
             </article>"""
 
