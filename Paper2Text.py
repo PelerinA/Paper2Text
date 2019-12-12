@@ -50,11 +50,11 @@ class Parser:
     def nbFirstLineWithName(self):
         # parcourir le contenu a parser
         fileLines = self.content.split("\n")
-        found = 0
         for line in fileLines:
             for firstname in self.firstnames:
-                if(line.find(firstname[:-1] + " ") != -1):
-                    return self.content.find(line)
+                for word in re.findall(r"[\w']+", line):
+                    if word == (firstname.upper()[0] + firstname.lower()[1:-1]):
+                        return self.content.find(line)
         
 
     # premiere ligne ou contenu avant la premiere ligne contenant un prenom
@@ -70,14 +70,15 @@ class Parser:
 
     # entre le titre et l'abstract
     def getAuteurs(self):
-        print(self.getTitle())
-        ss = re.search('(?is)'+self.getTitle()+'(.*?)abstract',self.content)
+        title = self.getTitle()
+        print("Title: " + title)
+        ss = re.search('(?is)'+title+'(.*?)abstract',self.content)
         if ss:
             return ss.group(1).replace('\n',' ')
         return ""
     # derniere page ou après Aknowledgments et References
     def getBiblio(self):
-        ss = re.search('(?is)references(.*?)\Z',self.content)
+        ss = re.search('(?is)\nreferences\n(.*?)\Z',self.content)
         if ss:
             return ss.group(1).replace('\n',' ')
         return ""
@@ -95,10 +96,9 @@ class Converter:
         self.targetDir=os.path.dirname(os.path.realpath(__file__))+os.path.sep+sys.argv[1]
         self.outputDir=self.targetDir+os.path.sep+"output"
         self.tmpDir="./tmp"
-        if os.path.exists(self.tmpDir):
-            print("Le répertoire /tmp existe déjà")
-        else:
-            os.mkdir(self.tmpDir, 0o755)
+        self.removeTemporaryFolder()
+        os.mkdir(self.tmpDir, 0o755)
+        print("Répertoire tmp crée")
 
     def createTemporaryFiles(self):
         # convertir les PDF en format txt avec pdftotext dans un dossier tmp
@@ -124,15 +124,16 @@ class Converter:
                 PersiFichierTexte.stringToPersi(paper.toText(),self.outputDir+os.path.sep+filename)
             elif sys.argv[2] == "-x" :
                 PersiFichierTexte.stringToPersi(paper.toXML(),self.outputDir+os.path.sep+filename[:-3]+"xml")
-            else : 
+            else :
                 print("Unvalid option " + sys.argv[2])
                 break
 
     def removeTemporaryFolder(self):
         if os.path.exists(self.tmpDir):
                 shutil.rmtree(self.tmpDir)
+                print("Répertoire tmp supprimé")
         else:
-            print("Le repertoire tmp ne peut être supprimé")
+            print("Le repertoire tmp ne peut être supprimé, il n'existe pas")
 
 
 
