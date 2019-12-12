@@ -5,13 +5,15 @@ import shutil
 import tempfile
 
 class PaperEnt:
-    def __init__(self,filename="",title="",abstract="",auteurs="",discussion="",biblio="", intro="", corps=""):
+    def __init__(self,filename="",title="",abstract="",auteurs="",discussion="",biblio="", intro="", corps="", acknow="", conclusion=""):
         self.filename=filename
         self.title=title
         self.abstract=abstract
         self.intro=intro
         self.auteurs=auteurs
         self.discussion=discussion
+        self.conclusion=conclusion
+        self.acknow=acknow
         self.biblio=biblio
         self.corps=corps
 
@@ -22,12 +24,14 @@ class PaperEnt:
     def toXML(self):
         return """<article>\n
             <preamble>"""+self.filename+"""</preamble>\n
-            <title>"""+self.title+"""</title>\n
+            <title>"""+self.title+"""</titre>\n
             <auteur>"""+self.auteurs+"""</auteur>\n
             <abstract>"""+self.abstract+"""</abstract>\n
             <introduction>"""+self.intro+"""</introduction>\n
             <corps>"""+self.corps+"""</corps>\n
             <discussion>"""+self.discussion+"""</discussion>\n
+            <conclusion>"""+self.conclusion+"""</conclusion>\n
+            <acknowledgments>"""+self.acknow+"""</acknowledgments>\n
             <biblio>"""+self.biblio+"""</biblio>\n
             </article>"""
 
@@ -86,6 +90,29 @@ class Parser:
         ss = re.search('(?is)\nreferences\n(.*?)\Z',self.content)
         if ss:
             return ss.group(1).replace('\n',' ')
+        else:
+            ss = re.search('(?is)references(.*?)\Z',self.content)
+            if ss:
+                return ss.group(1).replace('\n',' ')
+        return ""
+
+    # avant la biblio
+    def getConclusion(self):
+        ss = re.search('(?is)conclusion(.*?)\Z',self.content)
+        if ss:
+            conclusion = ss.group(1)
+            conclusion =  '\n'.join(conclusion.split('\n')[1:]).replace('\n',' ')
+            tmp = self.getBiblio()
+            tmp2 = self.getAcknow()
+            return conclusion.replace(tmp,'').replace(tmp2,'')
+        return ""
+
+    def getAcknow(self):
+        ss = re.search('(?is)acknowledgments(.*?)\Z',self.content)
+        if ss:
+            acknow = ss.group(1).replace('\n',' ')
+            tmp = self.getBiblio()
+            return acknow.replace(tmp,'')
         return ""
 
     # contenu entre l'intro et la conclusion
