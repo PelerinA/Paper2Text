@@ -68,6 +68,10 @@ class Converter:
         self.targetDir=os.path.dirname(os.path.realpath(__file__))+os.path.sep+sys.argv[1]
         self.outputDir=self.targetDir+os.path.sep+"output"
         self.tmpDir="./tmp"
+        if os.path.exists(self.tmpDir):
+            print("Le répertoire /tmp existe déjà")
+        else:
+            os.mkdir(self.tmpDir, 0o755)
 
     def createTemporaryFiles(self):
         # convertir les PDF en format txt avec pdftotext dans un dossier tmp
@@ -89,12 +93,19 @@ class Converter:
             # PersiFichierTexte.stringToPersi(paper.toText(),outputDir+os.path.sep+filename)
             PersiFichierTexte.stringToPersi(paper.toXML(),self.outputDir+os.path.sep+filename[:-3]+"xml")
 
+    def removeTemporaryFolder(self):
+        if os.path.exists(self.tmpDir):
+                shutil.rmtree(self.tmpDir)
+        else:
+            print("Le repertoire tmp ne peut être supprimé")
+
 
 
 def main():
     converter = Converter()
     converter.createTemporaryFiles()
     converter.convert()
+    converter.removeTemporaryFolder()
 
 main()
 # paper = PaperEnt()
