@@ -75,7 +75,7 @@ class Parser:
         return ""
     # derniere page ou après Aknowledgments et References
     def getBiblio(self):
-        ss = re.search('(?is)references(.*?)\Z',self.content)
+        ss = re.search('(?is)\nreferences\n(.*?)\Z',self.content)
         if ss:
             return ss.group(1).replace('\n',' ')
         return ""
