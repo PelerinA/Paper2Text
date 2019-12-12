@@ -50,16 +50,10 @@ class Parser:
         fileLines = self.content.split("\n")
         for line in fileLines:
             for firstname in self.firstnames:
-<<<<<<< HEAD
                 for word in re.findall(r"[\w']+", line):
                     if word == (firstname.upper()[0] + firstname.lower()[1:-1]):
                         return self.content.find(line)
         
-=======
-                if(line.find(firstname[:-1] + " ") != -1):
-                    return self.content.find(line)
-
->>>>>>> 4e64d3b412b2a661027d868eb1bc9e06406e7df1
 
     # premiere ligne ou contenu avant la premiere ligne contenant un prenom
     def getTitle(self):
