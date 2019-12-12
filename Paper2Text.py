@@ -53,7 +53,7 @@ class Parser:
             for firstname in self.firstnames:
                 if(line.find(firstname[:-1] + " ") != -1):
                     return self.content.find(line)
-        
+
 
     # premiere ligne ou contenu avant la premiere ligne contenant un prenom
     def getTitle(self):
@@ -86,10 +86,9 @@ class Converter:
         self.targetDir=os.path.dirname(os.path.realpath(__file__))+os.path.sep+sys.argv[1]
         self.outputDir=self.targetDir+os.path.sep+"output"
         self.tmpDir="./tmp"
-        if os.path.exists(self.tmpDir):
-            print("Le répertoire /tmp existe déjà")
-        else:
-            os.mkdir(self.tmpDir, 0o755)
+        self.removeTemporaryFolder()
+        os.mkdir(self.tmpDir, 0o755)
+        print("Répertoire tmp crée")
 
     def createTemporaryFiles(self):
         # convertir les PDF en format txt avec pdftotext dans un dossier tmp
@@ -114,15 +113,16 @@ class Converter:
                 PersiFichierTexte.stringToPersi(paper.toText(),self.outputDir+os.path.sep+filename)
             elif sys.argv[2] == "-x" :
                 PersiFichierTexte.stringToPersi(paper.toXML(),self.outputDir+os.path.sep+filename[:-3]+"xml")
-            else : 
+            else :
                 print("Unvalid option " + sys.argv[2])
                 break
 
     def removeTemporaryFolder(self):
         if os.path.exists(self.tmpDir):
                 shutil.rmtree(self.tmpDir)
+                print("Répertoire tmp supprimé")
         else:
-            print("Le repertoire tmp ne peut être supprimé")
+            print("Le repertoire tmp ne peut être supprimé, il n'existe pas")
 
 
 
