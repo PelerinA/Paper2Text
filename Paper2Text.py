@@ -3,7 +3,6 @@ import os
 import re
 import shutil
 import tempfile
-import subprocess
 
 class PaperEnt:
     def __init__(self,filename="",title="",abstract="",auteurs="",biblio=""):
@@ -67,16 +66,19 @@ def main():
     # on suppose que le targetDir est dans le meme repertoire que le script
     targetDir=os.path.dirname(os.path.realpath(__file__))+os.path.sep+sys.argv[1]
     outputDir=targetDir+os.path.sep+"output"
+
     # creer un sous dossier à ce dossier (le supprimer s'il existe deja)
     if os.path.exists(outputDir) and os.path.isdir(outputDir):
         shutil.rmtree(outputDir)
     os.mkdir(outputDir)
+
     # convertir les PDF en format txt avec pdftotext dans un dossier tmp
     with tempfile.TemporaryDirectory() as tmpDir:
         for filename in os.listdir(targetDir):
             if filename.endswith('.pdf'):
                 f = filename.replace(" ","\ ")
                 os.system("pdftotext "+targetDir+os.path.sep+f+" "+tmpDir+os.path.sep+f[:-3]+"txt")
+
         # # deposer les sorties au format .txt, avec meme nom que pdf respectif
         for filename in os.listdir(tmpDir):
             # parsing vers entite Paper
