@@ -5,15 +5,16 @@ import shutil
 import tempfile
 
 class PaperEnt:
-    def __init__(self,filename="",title="",abstract="",auteurs="",biblio=""):
+    def __init__(self,filename="",title="",abstract="",auteurs="",discussion="",biblio=""):
         self.filename=filename
         self.title=title
         self.abstract=abstract
         self.auteurs=auteurs
+        self.discussion=discussion
         self.biblio=biblio
 
     def toText(self):
-        return self.filename+'\n'+self.title+'\n'+self.auteurs+self.abstract+'\n'+self.biblio
+        return self.filename+'\n'+self.title+'\n'+self.auteurs+self.abstract+'\n'+self.discussion+'\n'+self.biblio
 
     def toXML(self):
         return """<article>\n
@@ -21,6 +22,7 @@ class PaperEnt:
             <title>"""+self.title+"""</title>\n
             <auteur>"""+self.auteurs+"""</auteur>\n
             <abstract>"""+self.abstract+"""</abstract>\n
+            <discussion>"""+self.discussion+"""</discussion>\n
             <biblio>"""+self.biblio+"""</biblio>\n
             </article>"""
 
@@ -80,6 +82,13 @@ class Parser:
             return ss.group(1).replace('\n',' ')
         return ""
 
+    def getDiscussion(self):
+        ss = re.search('(?is)discussion\n(.*?)conclusion',self.content)
+        if ss:
+            return ss.group(1).replace('\n',' ')
+        return ""
+
+
 class Converter:
     def __init__(self):
         # on suppose que le targetDir est dans le meme repertoire que le script
@@ -108,6 +117,7 @@ class Converter:
             paper.title=parser.getTitle()
             paper.auteurs=parser.getAuteurs()
             paper.abstract=parser.getAbstract()
+            paper.discussion=parser.getDiscussion()
             paper.biblio=parser.getBiblio()
             # ecriture de l'entite Paper au format texte dans le dossier output
             if len(sys.argv) <= 2 or sys.argv[2] == "-t" :
