@@ -109,9 +109,4 @@ def main():
             # PersiFichierTexte.stringToPersi(paper.toText(),outputDir+os.path.sep+filename)
             PersiFichierTexte.stringToPersi(paper.toXML(),outputDir+os.path.sep+filename[:-3]+"xml")
 
-        # decommentez les 3 lignes du dessous pour debug
-        print(tmpDir)
-        while(1):
-            pass
-
 main()
