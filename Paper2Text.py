@@ -81,7 +81,7 @@ class Parser:
             return ss.group(1).replace('\n',' ')
         return ""
 
-class Converter:
+class Manager:
     def __init__(self):
         # on suppose que le targetDir est dans le meme repertoire que le script
         self.targetDir=os.path.dirname(os.path.realpath(__file__))+os.path.sep+sys.argv[1]
@@ -89,14 +89,20 @@ class Converter:
         self.tmpDir="./tmp"
         self.removeTemporaryFolder()
         os.mkdir(self.tmpDir, 0o755)
-        print("Répertoire tmp crée")
+        self.analyseTargetFolder()
+        index = 0
+        self.choices = []
+        for file in self.files:
+            self.choices.insert(index, 0)
 
     def createTemporaryFiles(self):
         # convertir les PDF en format txt avec pdftotext dans un dossier tmp
-            for filename in os.listdir(self.targetDir):
-                if filename.endswith('.pdf'):
+            index = 0
+            for filename in self.files:
+                if self.choices[index] == 1 and filename.endswith('.pdf'):
                     f = filename.replace(" ","\ ")
                     os.system("pdftotext "+self.targetDir+os.path.sep+f+" "+self.tmpDir+os.path.sep+f[:-3]+"txt")
+                index += 1
 
     def convert(self):
         # # deposer les sorties au format .txt, avec meme nom que pdf respectif
@@ -121,16 +127,63 @@ class Converter:
     def removeTemporaryFolder(self):
         if os.path.exists(self.tmpDir):
                 shutil.rmtree(self.tmpDir)
-                print("Répertoire tmp supprimé")
-        else:
-            print("Le repertoire tmp ne peut être supprimé, il n'existe pas")
 
+    def displayListOfFiles(self):
+        print("Liste des fichiers pris en charges :")
+        index = 0
+        for file in self.files:
+            chosen = " "
+            if(self.choices[index] == 1):
+                chosen = "X"
+            print(str(index) + ". " + chosen + " " + file)
+            index += 1
+
+    def askChoiceInput(self):
+        self.displayListOfFiles()
+        print("---------------------")
+        choice = input("Veuillez choisir un fichier à convertir par son numéro (entrez 'c' pour lancer la conversion, 'T' pour une jolie bannière): ")
+        if choice.isdigit():
+            if int(choice)+1 > len(self.files):
+                print("ERREUR: Aucun fichier n'est identifié par l'entrée donnée")
+            else:
+                if (self.choices[int(choice)] == 1):
+                    self.choices[int(choice)] = 0
+                else:
+                    self.choices[int(choice)] = 1
+        else:
+            if(choice == "c"):
+                return 1
+            elif(choice == "T"):
+                self.displayBanner()
+            else:
+                print("ERREUR: Commande inconnue")
+        return 0
+
+    def choiceLoop(self):
+        loopOver = 0
+        while loopOver != 1:
+            loopOver = self.askChoiceInput()
+    
+    def analyseTargetFolder(self):
+        index = 0
+        self.files = []
+        for filename in os.listdir(self.targetDir):
+            if filename.endswith(".pdf"):
+                self.files.insert(index, filename)
+                index += 1
+
+    def displayBanner(self):
+        print("")
+        print(PersiFichierTexte.persiToString("art"))
+        print("")
 
 
 def main():
-    converter = Converter()
-    converter.createTemporaryFiles()
-    converter.convert()
-    converter.removeTemporaryFolder()
+    manager = Manager()
+    manager.displayBanner()
+    manager.choiceLoop()
+    manager.createTemporaryFiles()
+    manager.convert()
+    manager.removeTemporaryFolder()
 
 main()
