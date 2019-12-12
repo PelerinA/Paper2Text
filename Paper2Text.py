@@ -69,16 +69,23 @@ class Parser:
     # entre le titre et l'abstract
     def getAuteurs(self):
         title = self.getTitle()
-        print("Title: " + title)
         ss = re.search('(?is)'+title+'(.*?)abstract',self.content)
         if ss:
             return ss.group(1).replace('\n',' ')
         return ""
+
     # derniere page ou après Aknowledgments et References
     def getBiblio(self):
         ss = re.search('(?is)\nreferences\n(.*?)\Z',self.content)
         if ss:
             return ss.group(1).replace('\n',' ')
+        return ""
+
+        # contenu entre l'intro et la conclusion
+    def getCorps(self):
+        ss = re.search('(?is)\nintroduction.*?\n2(.*?)\nconclusion.*?\Z',self.content)
+        if ss:
+            return "2"+ss.group(1).replace('\n',' ')[:-2]
         return ""
 
 class Manager:
@@ -115,6 +122,7 @@ class Manager:
             paper.auteurs=parser.getAuteurs()
             paper.abstract=parser.getAbstract()
             paper.biblio=parser.getBiblio()
+            paper.corps=parser.getCorps()
             # ecriture de l'entite Paper au format texte dans le dossier output
             if len(sys.argv) <= 2 or sys.argv[2] == "-t" :
                 PersiFichierTexte.stringToPersi(paper.toText(),self.outputDir+os.path.sep+filename)
