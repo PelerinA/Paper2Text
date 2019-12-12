@@ -95,7 +95,14 @@ class Converter:
         self.targetDir=os.path.dirname(os.path.realpath(__file__))+os.path.sep+sys.argv[1]
         self.outputDir=self.targetDir+os.path.sep+"output"
         self.tmpDir="./tmp"
+
+        #On verifie que les dossiers ne sont pas présents au démarrage du script
+        self.removeOutputFolder()
         self.removeTemporaryFolder()
+
+        #On les crée
+        os.mkdir(self.outputDir, 0o755)
+        print("Répertoire output crée")
         os.mkdir(self.tmpDir, 0o755)
         print("Répertoire tmp crée")
 
@@ -133,6 +140,13 @@ class Converter:
                 print("Répertoire tmp supprimé")
         else:
             print("Le repertoire tmp ne peut être supprimé, il n'existe pas")
+
+    def removeOutputFolder(self):
+        if os.path.exists(self.outputDir):
+                shutil.rmtree(self.outputDir)
+                print("Répertoire output supprimé")
+        else:
+            print("Le repertoire output ne peut être supprimé, il n'existe pas")
 
 
 
