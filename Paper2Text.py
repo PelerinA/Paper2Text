@@ -81,7 +81,7 @@ class Parser:
             return ss.group(1).replace('\n',' ')
         return ""
 
-    # contenu entre l'abstract et la biblio
+    # contenu entre l'intro et la conclusion
     def getCorps(self):
         ss = re.search('(?is)\nintroduction.*?\n2(.*?)\nconclusion.*?\Z',self.content)
         if ss:
