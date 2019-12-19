@@ -19,7 +19,7 @@ class PaperEnt:
     def toXML(self):
         return """<article>\n
             <preamble>"""+self.filename+"""</preamble>\n
-            <title>"""+self.title+"""</title>\n
+            <titre>"""+self.title+"""</titre>\n
             <auteur>"""+self.auteurs+"""</auteur>\n
             <abstract>"""+self.abstract+"""</abstract>\n
             <introduction>"""+self.intro+"""</introduction>\n
@@ -84,7 +84,7 @@ class Parser:
         return ""
 
     def getIntroduction(self):
-        ss = re.search('(?is)introduction(.*?)2\n\n',self.content)
+        ss = re.search('(?is)introduction(.*?)2.\n\n',self.content)
         if ss:
             return ss.group(1).replace('\n',' ')
         return ""
