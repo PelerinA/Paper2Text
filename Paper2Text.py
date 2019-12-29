@@ -68,32 +68,71 @@ class Parser:
 
     # premiere ligne ou contenu avant la premiere ligne contenant un prenom
     def getTitle(self):
-        return self.content[0:self.nbFirstLineWithName()]
-
-    # contenu entre abstract et introduction
-    def getAbstract(self):
-        ss = re.search('(?is)abstract(.*?)introduction',self.content)
-        if ss:
-            return ss.group(1).replace('\n',' ')
-        return ""
+        return self.content[0:self.nbFirstLineWithName()].replace('\n', ' ')
 
     # entre le titre et l'abstract
     def getAuteurs(self):
-        title = self.getTitle()
-        ss = re.search('(?is)'+title+'(.*?)abstract',self.content)
+        ss = re.search('(?is)(.*?)\Z',self.content)
         if ss:
-            return ss.group(1).replace('\n',' ')
+            auteurs = ss.group(1).replace('\n', ' ')
+            tmp = self.getBiblio()
+            tmp2 = self.getAcknow()
+            tmp3 = self.getConclusion()
+            tmp4 = self.getDiscussion()
+            tmp5 = self.getCorps()
+            tmp6 = self.getIntroduction()
+            tmp7 = self.getAbstract()
+            tmp8 = self.getTitle()
+            return auteurs.replace(tmp, '').replace(tmp2, '').replace(tmp3, '').replace(tmp4, '').replace(tmp5, '').replace(tmp6, '').replace(tmp7, '').replace(tmp8, '')
+        print("FOUND NO AUTHORS")
         return ""
 
-    # derniere page ou après Aknowledgments et References
-    def getBiblio(self):
-        ss = re.search('(?is)\nreferences\n(.*?)\Z',self.content)
+    # contenu entre abstract et introduction
+    def getAbstract(self):
+        ss = re.search('(?is)abstract(.*?)\Z',self.content)
         if ss:
-            return ss.group(1).replace('\n',' ')
-        else:
-            ss = re.search('(?is)references(.*?)\Z',self.content)
-            if ss:
-                return ss.group(1).replace('\n',' ')
+            abstract = ss.group(1).replace('\n',' ')
+            tmp = self.getBiblio()
+            tmp2 = self.getAcknow()
+            tmp3 = self.getConclusion()
+            tmp4 = self.getDiscussion()
+            tmp5 = self.getCorps()
+            tmp6 = self.getIntroduction()
+            return abstract.replace(tmp, '').replace(tmp2, '').replace(tmp3, '').replace(tmp4, '').replace(tmp5, '').replace(tmp6, '')
+        return ""
+
+    def getIntroduction(self):
+        ss = re.search('(?is)introduction\n(.*?)\Z',self.content)
+        if ss:
+            introduction = ss.group(1).replace('\n',' ')
+            tmp = self.getBiblio()
+            tmp2 = self.getAcknow()
+            tmp3 = self.getConclusion()
+            tmp4 = self.getDiscussion()
+            tmp5 = self.getCorps()
+            return introduction.replace(tmp, '').replace(tmp2, '').replace(tmp3, '').replace(tmp4, '').replace(tmp5, '')
+        return ""
+
+    # contenu entre l'intro et la conclusion
+    def getCorps(self):
+        ss = re.search('(?is)\nintroduction.*?\n2(.*?)\Z',self.content)
+        if ss:
+            corps = "2"+ss.group(1).replace('\n',' ')[:-2]
+            tmp = self.getBiblio()
+            tmp2 = self.getAcknow()
+            tmp3 = self.getConclusion()
+            tmp4 = self.getDiscussion()
+            return corps.replace(tmp, '').replace(tmp2, '').replace(tmp3, '').replace(tmp4, '')
+        return ""
+
+    def getDiscussion(self):
+        ss = re.search('(?is)discussion\n(.*?)\Z',self.content)
+        if ss:
+            discussion = ss.group(1).replace('\n',' ')
+            tmp = self.getBiblio()
+            tmp2 = self.getAcknow()
+            tmp3 = self.getConclusion()
+            return discussion.replace(tmp, '').replace(tmp2, '').replace(tmp3, '')
         return ""
 
     # avant la biblio
@@ -115,23 +154,15 @@ class Parser:
             return acknow.replace(tmp,'')
         return ""
 
-    # contenu entre l'intro et la conclusion
-    def getCorps(self):
-        ss = re.search('(?is)\nintroduction.*?\n2(.*?)\nconclusion.*?\Z',self.content)
-        if ss:
-            return "2"+ss.group(1).replace('\n',' ')[:-2]
-        return ""
-
-    def getIntroduction(self):
-        ss = re.search('(?is)introduction(.*?)2\n\n',self.content)
+    # derniere page ou après Aknowledgments et References
+    def getBiblio(self):
+        ss = re.search('(?is)\nreferences\n(.*?)\Z',self.content)
         if ss:
             return ss.group(1).replace('\n',' ')
-        return ""
-
-    def getDiscussion(self):
-        ss = re.search('(?is)discussion\n(.*?)conclusion',self.content)
-        if ss:
-            return ss.group(1).replace('\n',' ')
+        else:
+            ss = re.search('(?is)references(.*?)\Z',self.content)
+            if ss:
+                return ss.group(1).replace('\n',' ')
         return ""
 
 class Manager:
