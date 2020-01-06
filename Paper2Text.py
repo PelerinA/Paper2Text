@@ -115,14 +115,23 @@ class Parser:
 
     # contenu entre l'intro et la conclusion
     def getCorps(self):
-        ss = re.search('(?is)Introduction.*?\n2(.*?)\Z',self.content)
+        ss = re.search('(?is)Introduction.*?\nII(.*?)\Z',self.content)
         if ss:
-            corps = "2"+ss.group(1).replace('\n',' ')[:-2]
+            corps = ss.group(1).replace('\n',' ')
             tmp = self.getBiblio()
             tmp2 = self.getAcknow()
             tmp3 = self.getConclusion()
             tmp4 = self.getDiscussion()
             return corps.replace(tmp, '').replace(tmp2, '').replace(tmp3, '').replace(tmp4, '')
+        else:
+            ss = re.search('(?is)Introduction.*?\n2(.*?)\Z',self.content)
+            if ss:
+                corps = ss.group(1).replace('\n',' ')
+                tmp = self.getBiblio()
+                tmp2 = self.getAcknow()
+                tmp3 = self.getConclusion()
+                tmp4 = self.getDiscussion()
+                return corps.replace(tmp, '').replace(tmp2, '').replace(tmp3, '').replace(tmp4, '')
         return ""
 
     def getDiscussion(self):
